@@ -3418,6 +3418,8 @@ class BaseCase(unittest.TestCase):
         viewport_height = self.execute_script("return window.innerHeight;")
         x = math.ceil(window_rect["x"] + i_x + element_rect["x"])
         y = math.ceil(w_bottom_y - viewport_height + i_y + element_rect["y"])
+        y_scroll_offset = self.execute_script("return window.pageYOffset;")
+        y = int(y - y_scroll_offset)
         if iframe_switch:
             self.switch_to_frame()
             if not self.is_element_present(selector, by=by):
@@ -4244,12 +4246,16 @@ class BaseCase(unittest.TestCase):
                 self.uc_gui_click_x_y = new_driver.uc_gui_click_x_y
             if hasattr(new_driver, "uc_gui_click_captcha"):
                 self.uc_gui_click_captcha = new_driver.uc_gui_click_captcha
-            if hasattr(new_driver, "uc_gui_click_rc"):
-                self.uc_gui_click_rc = new_driver.uc_gui_click_rc
             if hasattr(new_driver, "uc_gui_click_cf"):
                 self.uc_gui_click_cf = new_driver.uc_gui_click_cf
+            if hasattr(new_driver, "uc_gui_click_rc"):
+                self.uc_gui_click_rc = new_driver.uc_gui_click_rc
+            if hasattr(new_driver, "uc_gui_handle_captcha"):
+                self.uc_gui_handle_captcha = new_driver.uc_gui_handle_captcha
             if hasattr(new_driver, "uc_gui_handle_cf"):
                 self.uc_gui_handle_cf = new_driver.uc_gui_handle_cf
+            if hasattr(new_driver, "uc_gui_handle_rc"):
+                self.uc_gui_handle_rc = new_driver.uc_gui_handle_rc
             if hasattr(new_driver, "uc_switch_to_frame"):
                 self.uc_switch_to_frame = new_driver.uc_switch_to_frame
         return new_driver
@@ -13788,31 +13794,33 @@ class BaseCase(unittest.TestCase):
         which is the default mode on Linux unless using another arg."""
         if "linux" in sys.platform and (not self.headed or self.xvfb):
             from sbvirtualdisplay import Display
-            if self.undetectable and not (self.headless or self.headless2):
-                import Xlib.display
-                try:
-                    self._xvfb_display = Display(
-                        visible=True,
-                        size=(1366, 768),
-                        backend="xvfb",
-                        use_xauth=True,
-                    )
-                    self._xvfb_display.start()
-                    if "DISPLAY" not in os.environ.keys():
+            pip_find_lock = fasteners.InterProcessLock(
+                constants.PipInstall.FINDLOCK
+            )
+            with pip_find_lock:  # Prevent issues with multiple processes
+                if self.undetectable and not (self.headless or self.headless2):
+                    import Xlib.display
+                    try:
+                        self._xvfb_display = Display(
+                            visible=True,
+                            size=(1366, 768),
+                            backend="xvfb",
+                            use_xauth=True,
+                        )
+                        self._xvfb_display.start()
+                        if "DISPLAY" not in os.environ.keys():
+                            print(
+                                "\nX11 display failed! Will use regular xvfb!"
+                            )
+                            self.__activate_standard_virtual_display()
+                    except Exception as e:
+                        if hasattr(e, "msg"):
+                            print("\n" + str(e.msg))
+                        else:
+                            print(e)
                         print("\nX11 display failed! Will use regular xvfb!")
                         self.__activate_standard_virtual_display()
-                except Exception as e:
-                    if hasattr(e, "msg"):
-                        print("\n" + str(e.msg))
-                    else:
-                        print(e)
-                    print("\nX11 display failed! Will use regular xvfb!")
-                    self.__activate_standard_virtual_display()
-                    return
-                pip_find_lock = fasteners.InterProcessLock(
-                    constants.PipInstall.FINDLOCK
-                )
-                with pip_find_lock:  # Prevent issues with multiple processes
+                        return
                     pyautogui_is_installed = False
                     try:
                         import pyautogui
@@ -13854,8 +13862,8 @@ class BaseCase(unittest.TestCase):
                                 print("\n" + str(e.msg))
                             else:
                                 print(e)
-            else:
-                self.__activate_standard_virtual_display()
+                else:
+                    self.__activate_standard_virtual_display()
 
     def __ad_block_as_needed(self):
         """This is an internal method for handling ad-blocking.
@@ -14810,8 +14818,8 @@ class BaseCase(unittest.TestCase):
             metrics_list = metrics_string.split(",")
             exception_string = (
                 "Invalid input for Mobile Emulator device metrics!\n"
-                "Expecting a comma-separated string with three\n"
-                "integer values for Width, Height, and Pixel-Ratio.\n"
+                "Expecting a comma-separated string with integer values\n"
+                "for Width/Height, and an int or float for Pixel-Ratio.\n"
                 'Example: --metrics="411,731,3" '
             )
             if len(metrics_list) != 3:
@@ -14819,7 +14827,7 @@ class BaseCase(unittest.TestCase):
             try:
                 self.__device_width = int(metrics_list[0])
                 self.__device_height = int(metrics_list[1])
-                self.__device_pixel_ratio = int(metrics_list[2])
+                self.__device_pixel_ratio = float(metrics_list[2])
                 self.mobile_emulator = True
             except Exception:
                 raise Exception(exception_string)

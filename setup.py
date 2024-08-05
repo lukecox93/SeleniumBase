@@ -147,16 +147,17 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         'pip>=24.0;python_version<"3.8"',
-        'pip>=24.1.2;python_version>="3.8"',
+        'pip>=24.1.2;python_version>="3.8"',  # 24.2: editable install warnings
         'packaging>=24.0;python_version<"3.8"',
         'packaging>=24.1;python_version>="3.8"',
         'setuptools>=68.0.0;python_version<"3.8"',
-        'setuptools>=70.2.0;python_version>="3.8"',
+        'setuptools~=70.2;python_version>="3.8" and python_version<"3.10"',
+        'setuptools>=70.2.0;python_version>="3.10"',  # 71.0.x has issues
         'wheel>=0.42.0;python_version<"3.8"',
         'wheel>=0.43.0;python_version>="3.8"',
         'attrs>=23.2.0',
         "certifi>=2024.7.4",
-        "exceptiongroup>=1.2.1",
+        "exceptiongroup>=1.2.2",
         'filelock>=3.12.2;python_version<"3.8"',
         'filelock>=3.15.4;python_version>="3.8"',
         'platformdirs>=4.0.0;python_version<"3.8"',
@@ -172,7 +173,7 @@ setup(
         'urllib3>=1.26.19,<2;python_version<"3.10"',
         'urllib3>=1.26.19,<2.3.0;python_version>="3.10"',
         'requests==2.31.0',
-        "pynose==1.5.1",
+        "pynose==1.5.2",
         'sniffio==1.3.1',
         'h11==0.14.0',
         'outcome==1.3.0.post0',
@@ -182,7 +183,7 @@ setup(
         'wsproto==1.2.0',
         'websocket-client==1.8.0;python_version>="3.8"',
         'selenium==4.11.2;python_version<"3.8"',
-        'selenium==4.22.0;python_version>="3.8"',
+        'selenium==4.23.1;python_version>="3.8"',
         'cssselect==1.2.0',
         "sortedcontainers==2.4.0",
         'fasteners==0.19',
@@ -193,7 +194,7 @@ setup(
         'pluggy==1.5.0;python_version>="3.8"',
         "py==1.11.0",  # Needed by pytest-html
         'pytest==7.4.4;python_version<"3.8"',
-        'pytest==8.2.1;python_version>="3.8"',
+        'pytest==8.3.2;python_version>="3.8"',
         "pytest-html==2.0.1",  # Newer ones had issues
         'pytest-metadata==3.0.0;python_version<"3.8"',
         'pytest-metadata==3.1.1;python_version>="3.8"',
@@ -211,8 +212,8 @@ setup(
         'pygments==2.17.2;python_version<"3.8"',
         'pygments==2.18.0;python_version>="3.8"',
         'pyreadline3==3.4.1;platform_system=="Windows"',
-        "tabcompleter==1.3.0",
-        "pdbp==1.5.1",
+        "tabcompleter==1.3.3",
+        "pdbp==1.5.3",
         'colorama==0.4.6',
         'pyotp==2.9.0',
         'python-xlib==0.33;platform_system=="Linux"',
@@ -234,7 +235,7 @@ setup(
         # Usage: coverage run -m pytest; coverage html; coverage report
         "coverage": [
             'coverage==7.2.7;python_version<"3.8"',
-            'coverage>=7.5.4;python_version>="3.8"',
+            'coverage>=7.6.0;python_version>="3.8"',
             'pytest-cov==4.1.0;python_version<"3.8"',
             'pytest-cov>=5.0.0;python_version>="3.8"',
         ],
@@ -261,7 +262,7 @@ setup(
             'pdfminer.six==20221105;python_version<"3.8"',
             'pdfminer.six==20240706;python_version>="3.8"',
             'cryptography==39.0.2;python_version<"3.9"',
-            'cryptography==42.0.8;python_version>="3.9"',
+            'cryptography==43.0.0;python_version>="3.9"',
             'cffi==1.15.1;python_version<"3.8"',
             'cffi==1.16.0;python_version>="3.8"',
             "pycparser==2.22",
@@ -299,6 +300,7 @@ setup(
         # pip install -e .[selenium-wire]
         "selenium-wire": [
             'selenium-wire==5.1.0',
+            'pyOpenSSL==24.2.1',
             'Brotli==1.1.0',
             'blinker==1.7.0',  # Newer ones had issues
             'h2==4.1.0',
@@ -307,7 +309,7 @@ setup(
             'kaitaistruct==0.10',
             'pyasn1==0.5.1;python_version<"3.8"',
             'pyasn1==0.6.0;python_version>="3.8"',
-            'zstandard==0.22.0',
+            'zstandard==0.23.0',
         ],
     },
     packages=[
